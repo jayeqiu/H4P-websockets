@@ -22,7 +22,7 @@ const bool USE_SSL = true;
 const int LED1 = D10;
 const int LED2 = D9;
 const int LED3 = D8;
-const int PHOTORESISTOR = A0;
+// const int PHOTORESISTOR = A0;
 const unsigned long SEND_INTERVAL_MS = 50;    // 20 samples per second
 // ---------------------------------------------------------------------------
 
@@ -52,11 +52,7 @@ void onWsEvent(WStype_t type, uint8_t* payload, size_t length) {
           digitalWrite(LED1, LOW);
           digitalWrite(LED2, LOW);
           digitalWrite(LED3, HIGH);
-        } else {
-          digitalWrite(LED1, LOW);
-          digitalWrite(LED2, LOW);
-          digitalWrite(LED3, LOW);
-        }
+        } 
       }
       break;
     default:
@@ -92,7 +88,7 @@ void setup() {
     delay(300);
     Serial.print(".");
   }
-  digitalWrite(LED1, HIGH);
+  digitalWrite(LED1, LOW);
   digitalWrite(LED2, LOW);
   digitalWrite(LED3, LOW);
   Serial.print(" connected, ip ");

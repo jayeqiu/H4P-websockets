@@ -22,8 +22,8 @@ function connect() {
   // With serial we had to poll the buffer every frame.
   // With WebSockets the browser calls this function once per message,
   // as soon as it arrives, so there is no buffer to drain.
-  // ws.onmessage = (event) => {
-  //   let msg = event.data;
+  ws.onmessage = (event) => {
+    let msg = event.data;
   //   // console.log(msg);                                  // raw line from the C6
   //   // console.log(msg.trim().split(","));                // array of "strings"
   //   // console.log(msg.trim().split(",").map(Number));    // array of numbers
@@ -40,7 +40,7 @@ function connect() {
   //     gy = v[4];
   //     gz = v[5];
   //   }
-  // };
+  };
 
   // if the server restarts, try again in 2 s (the C6 does the same)
   ws.onclose = () => {
@@ -64,9 +64,9 @@ function draw() {
   text("1 / 2 / 3 = LED", 10, 40);
 }
 
-// function send(msg) {
-//   if (ws.readyState === 1) ws.send(msg);   // only when the socket is open
-// }
+function send(msg) {
+  if (ws.readyState === 1) ws.send(msg);   // only when the socket is open
+}
 
 function keyPressed() {
   if (key === "1" || key === "2" || key === "3") send(key);   // turn on specific LED
