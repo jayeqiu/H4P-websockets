@@ -15,7 +15,7 @@
 const char* WIFI_SSID = "gd-network-2g";
 const char* WIFI_PASS = "HeheheHahaha";
 
-const char* SERVER_HOST = "h4p-esp-sockets.onrender.com/";   // laptop running server.js
+const char* SERVER_HOST = "h4p-websockets.onrender.com/";   // laptop running server.js
 const int   SERVER_PORT = 443;
 const bool USE_SSL = true;
 
@@ -66,7 +66,9 @@ void onWsEvent(WStype_t type, uint8_t* payload, size_t length) {
 
 void setup() {
   Serial.begin(115200);
-  pinMode(LED, OUTPUT);
+  pinMode(LED1, OUTPUT);
+  pinMode(LED2, OUTPUT);
+  pinMode(LED3, OUTPUT);
 
   // --- sensor ---
   // Wire.begin();                           // D4 = SDA, D5 = SCL
@@ -86,16 +88,22 @@ void setup() {
   WiFi.begin(WIFI_SSID, WIFI_PASS);
   Serial.print("wifi");
   while (WiFi.status() != WL_CONNECTED) {
-    digitalWrite(LED, !digitalRead(LED));   // slow blink while connecting
+    digitalWrite(LED1, !digitalRead(LED1));   // slow blink while connecting
     delay(300);
     Serial.print(".");
   }
-  digitalWrite(LED, LOW);
+  digitalWrite(LED1, HIGH);
+  digitalWrite(LED2, LOW);
+  digitalWrite(LED3, LOW);
   Serial.print(" connected, ip ");
   Serial.println(WiFi.localIP());
 
   // --- websocket ---
-  ws.begin(SERVER_HOST, SERVER_PORT, "/");
+  if (USE_SSL) {
+    ws.beginSSL(SERVER_HOST, SERVER_PORT, "/");   // wss:// (Render)
+  } else {
+    ws.begin(SERVER_HOST, SERVER_PORT, "/");      // ws://  (local)
+  }
   ws.onEvent(onWsEvent);
   ws.setReconnectInterval(2000);          // retry every 2 s if the server drops
 }
