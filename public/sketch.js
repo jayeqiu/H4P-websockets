@@ -4,7 +4,7 @@ let ws;
 let light = 0;          // raw reading, 0-4095
 let smooth = 0;         // smoothed value for drawing
 let lightMin = 0;       // calibrate these from Serial Monitor
-let lightMax = 4095;
+let lightMax = 1000;
 let ledState = 0;       // 0 = off, 1/2/3 = which LED
 
 function setup() {

@@ -52,7 +52,11 @@ void onWsEvent(WStype_t type, uint8_t* payload, size_t length) {
           digitalWrite(LED1, LOW);
           digitalWrite(LED2, LOW);
           digitalWrite(LED3, HIGH);
-        } 
+        } else if (payload[0] == '0') {
+          digitalWrite(LED1, LOW);
+          digitalWrite(LED2, LOW);
+          digitalWrite(LED3, LOW);
+        }
       }
       break;
     default:
