@@ -1,16 +1,15 @@
-// Address of the laptop running server.js (the relay).
-// Must be ws:// (not wss://) and this page must be opened over http://,
-// e.g. http://192.168.4.181:3000 — the p5 editor (https) will refuse ws://.
-
-// const SERVER = "ws://192.168.4.181:3000"; //if connecting to a different server
-const SERVER = "https://h4p-websockets.onrender.com/";
+const SERVER = "wss://h4p-websockets.onrender.com/";
 
 let ws;
-let ax = 0, ay = 0, az = 0, gx = 0, gy = 0, gz = 0;
-let toggle = false;
+let light = 0;          // raw reading, 0-4095
+let smooth = 0;         // smoothed value for drawing
+let lightMin = 0;       // calibrate these from Serial Monitor
+let lightMax = 4095;
+let ledState = 0;       // 0 = off, 1/2/3 = which LED
 
 function setup() {
   createCanvas(400, 400);
+  textSize(14);
   connect();
 }
 
@@ -19,30 +18,16 @@ function connect() {
 
   ws.onopen = () => console.log("connected to " + SERVER);
 
-  // With serial we had to poll the buffer every frame.
-  // With WebSockets the browser calls this function once per message,
-  // as soon as it arrives, so there is no buffer to drain.
   ws.onmessage = (event) => {
-    let msg = event.data;
-  //   // console.log(msg);                                  // raw line from the C6
-  //   // console.log(msg.trim().split(","));                // array of "strings"
-  //   // console.log(msg.trim().split(",").map(Number));    // array of numbers
+    let msg = String(event.data).trim();
 
-  //   let v = msg.trim().split(",").map(Number);
-
-  //   // the relay also forwards "1"/"0" LED messages from other clients,
-  //   // this check ignores anything that is not a 6-value sensor line
-  //   if (v.length === 6) {
-  //     ax = v[0];
-  //     ay = v[1];
-  //     az = v[2];
-  //     gx = v[3];
-  //     gy = v[4];
-  //     gz = v[5];
-  //   }
+    // only accept sensor lines like "L,2048"; ignore LED messages from others
+    if (msg.startsWith("L,")) {
+      let v = Number(msg.slice(2));
+      if (!isNaN(v)) light = v;
+    }
   };
 
-  // if the server restarts, try again in 2 s (the C6 does the same)
   ws.onclose = () => {
     console.log("disconnected, retrying...");
     setTimeout(connect, 2000);
@@ -50,24 +35,40 @@ function connect() {
 }
 
 function draw() {
-  background(20);
+  smooth = lerp(smooth, light, 0.1);   // ease out the jitter
 
-  // tilt moves the circle
-  // let x = map(ax, -9.8, 9.8, 0, width);
-  // let y = map(ay, -9.8, 9.8, 0, height);
-  // fill(255);
-  // circle(x, y, 40);
+  let t = constrain(map(smooth, lightMin, lightMax, 0, 1), 0, 1);
 
-  fill(200);
-  // readyState 1 means OPEN
+  background(lerpColor(color(20), color(255, 240, 180), t));
+
+  // circle grows with light
+  fill(255 - t * 200);
+  noStroke();
+  circle(width / 2, height / 2, 40 + t * 300);
+
+  // text
+  fill(t > 0.5 ? 20 : 220);
   text(ws.readyState === 1 ? "connected" : "connecting...", 10, 20);
-  text("1 / 2 / 3 = LED", 10, 40);
+  text("light: " + int(light), 10, 40);
+  text("press 1 / 2 / 3 = LED, 0 = off, space = cycle", 10, 60);
+  text("LED: " + ledState, 10, 80);
 }
 
 function send(msg) {
-  if (ws.readyState === 1) ws.send(msg);   // only when the socket is open
+  if (ws.readyState === 1) ws.send(msg);
 }
 
 function keyPressed() {
-  if (key === "1" || key === "2" || key === "3") send(key);   // turn on specific LED
+  if (key === "1" || key === "2" || key === "3") {
+    ledState = int(key);
+    send(key);
+  }
+  if (key === "0") {
+    ledState = 0;
+    send("0");        // your Arduino code ignores "0", see note below
+  }
+  if (key === " ") {
+    ledState = (ledState % 3) + 1;   // cycle 1 -> 2 -> 3 -> 1
+    send(String(ledState));
+  }
 }

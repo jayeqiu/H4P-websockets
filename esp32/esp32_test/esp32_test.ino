@@ -15,14 +15,14 @@
 const char* WIFI_SSID = "gd-network-2g";
 const char* WIFI_PASS = "HeheheHahaha";
 
-const char* SERVER_HOST = "h4p-websockets.onrender.com/";   // laptop running server.js
+const char* SERVER_HOST = "h4p-websockets.onrender.com";   // laptop running server.js
 const int   SERVER_PORT = 443;
 const bool USE_SSL = true;
 
 const int LED1 = D10;
 const int LED2 = D9;
 const int LED3 = D8;
-// const int PHOTORESISTOR = A0;
+const int PHOTORESISTOR = A0;
 const unsigned long SEND_INTERVAL_MS = 50;    // 20 samples per second
 // ---------------------------------------------------------------------------
 
@@ -65,6 +65,7 @@ void setup() {
   pinMode(LED1, OUTPUT);
   pinMode(LED2, OUTPUT);
   pinMode(LED3, OUTPUT);
+  analogReadResolution(12);   // 0-4095, the default on ESP32
 
   // --- sensor ---
   // Wire.begin();                           // D4 = SDA, D5 = SCL
@@ -119,4 +120,17 @@ void loop() {
     //          g.gyro.x, g.gyro.y, g.gyro.z);
     // ws.sendTXT(line);
   // }
+
+  // ---- photoresistor ----
+  if (ws.isConnected() && millis() - lastSend >= SEND_INTERVAL_MS) {
+    lastSend = millis();
+
+    int light = analogRead(PHOTORESISTOR);
+
+    char line[16];
+    snprintf(line, sizeof(line), "L,%d", light);
+    ws.sendTXT(line);
+
+    Serial.println(light);   // for checking the range
+  }
 }
