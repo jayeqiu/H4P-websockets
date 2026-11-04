@@ -22,25 +22,25 @@ function connect() {
   // With serial we had to poll the buffer every frame.
   // With WebSockets the browser calls this function once per message,
   // as soon as it arrives, so there is no buffer to drain.
-  ws.onmessage = (event) => {
-    let msg = event.data;
-    // console.log(msg);                                  // raw line from the C6
-    // console.log(msg.trim().split(","));                // array of "strings"
-    // console.log(msg.trim().split(",").map(Number));    // array of numbers
+  // ws.onmessage = (event) => {
+  //   let msg = event.data;
+  //   // console.log(msg);                                  // raw line from the C6
+  //   // console.log(msg.trim().split(","));                // array of "strings"
+  //   // console.log(msg.trim().split(",").map(Number));    // array of numbers
 
-    let v = msg.trim().split(",").map(Number);
+  //   let v = msg.trim().split(",").map(Number);
 
-    // the relay also forwards "1"/"0" LED messages from other clients,
-    // this check ignores anything that is not a 6-value sensor line
-    if (v.length === 6) {
-      ax = v[0];
-      ay = v[1];
-      az = v[2];
-      gx = v[3];
-      gy = v[4];
-      gz = v[5];
-    }
-  };
+  //   // the relay also forwards "1"/"0" LED messages from other clients,
+  //   // this check ignores anything that is not a 6-value sensor line
+  //   if (v.length === 6) {
+  //     ax = v[0];
+  //     ay = v[1];
+  //     az = v[2];
+  //     gx = v[3];
+  //     gy = v[4];
+  //     gz = v[5];
+  //   }
+  // };
 
   // if the server restarts, try again in 2 s (the C6 does the same)
   ws.onclose = () => {
@@ -53,10 +53,10 @@ function draw() {
   background(20);
 
   // tilt moves the circle
-  let x = map(ax, -9.8, 9.8, 0, width);
-  let y = map(ay, -9.8, 9.8, 0, height);
-  fill(255);
-  circle(x, y, 40);
+  // let x = map(ax, -9.8, 9.8, 0, width);
+  // let y = map(ay, -9.8, 9.8, 0, height);
+  // fill(255);
+  // circle(x, y, 40);
 
   fill(200);
   // readyState 1 means OPEN
@@ -64,9 +64,9 @@ function draw() {
   text("1 / 2 / 3 = LED", 10, 40);
 }
 
-function send(msg) {
-  if (ws.readyState === 1) ws.send(msg);   // only when the socket is open
-}
+// function send(msg) {
+//   if (ws.readyState === 1) ws.send(msg);   // only when the socket is open
+// }
 
 function keyPressed() {
   if (key === "1" || key === "2" || key === "3") send(key);   // turn on specific LED
