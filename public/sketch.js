@@ -3,7 +3,7 @@
 // e.g. http://192.168.4.181:3000 — the p5 editor (https) will refuse ws://.
 
 // const SERVER = "ws://192.168.4.181:3000"; //if connecting to a different server
-const SERVER = "ws://" + location.host;
+const SERVER = "https://h4p-websockets.onrender.com/";
 
 let ws;
 let ax = 0, ay = 0, az = 0, gx = 0, gy = 0, gz = 0;
@@ -61,7 +61,7 @@ function draw() {
   fill(200);
   // readyState 1 means OPEN
   text(ws.readyState === 1 ? "connected" : "connecting...", 10, 20);
-  text("1 / 0 / space = LED", 10, 40);
+  text("1 / 2 / 3 = LED", 10, 40);
 }
 
 function send(msg) {
@@ -69,13 +69,5 @@ function send(msg) {
 }
 
 function keyPressed() {
-  if (key === "1" || key === "0") send(key);   // LED on/off
-  if (key === " ") {
-    if (toggle) {
-      send("0");
-    } else {
-      send("1");
-    }
-    toggle = !toggle;
-  }
+  if (key === "1" || key === "2" || key === "3") send(key);   // turn on specific LED
 }
